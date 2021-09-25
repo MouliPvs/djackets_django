@@ -33,8 +33,10 @@ class Category(models.Model):
 #Product Model
 class Product(models.Model):
 
-    #ManyToOne Relationship i.e Many Products Single Category
-    #on_delete=models.CASCAD : Deleting the one of category deletes all products under that category
+    """
+    ManyToOne Relationship i.e Many Products Single Category
+    on_delete=models.CASCAD : Deleting one of category deletes all products under that category
+    """
     category = models.ForeignKey(Category , related_name='products' , on_delete=models.CASCADE)
     
     name = models.CharField(max_length=255)
