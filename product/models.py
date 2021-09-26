@@ -4,6 +4,7 @@ from PIL import Image
 
 #for creating thumbnails
 from django.core.files import File
+
 from django.db import models
 from django.db.models.fields import SlugField
 
@@ -16,14 +17,14 @@ class Category(models.Model):
 
     #For Ordering Categories
     class Meta:
-        #orders categories according to name in ascending order
+        #orders categories according to 'name' in ascending order
         ordering = ('name',)
     #// Class Meta
 
     def __str__(self) -> str:
         return self.name
 
-    def get_absolute_url(self) -> str:
+    def get_absolute_url(self) -> SlugField:
         """
         Returns The URL Of The Category
         """
@@ -34,11 +35,11 @@ class Category(models.Model):
 class Product(models.Model):
 
     """
-    ManyToOne Relationship i.e Many Products Single Category
+    ManyToOne Relationship i.e Many Products Under Single Category
     on_delete=models.CASCAD : Deleting one of category deletes all products under that category
     """
     category = models.ForeignKey(Category , related_name='products' , on_delete=models.CASCADE)
-    
+
     name = models.CharField(max_length=255)
     slug = models.SlugField()
 
@@ -62,15 +63,15 @@ class Product(models.Model):
     def __str__(self) -> str:
         return self.name
 
-    def get_absolute_url(self) -> str:
+    def get_absolute_url(self):
         """
-        Returns The URL Of The Product
+        Returns The URL Of The Product i.e /CategoryUrl / ProductUrl /
         """
         return f'/{self.category.slug}/{self.slug}/'
 
     def get_image(self):
         """
-        Returns image URL if exists
+        Returns image URL if exists else returns null
         """
         if self.image:
             return 'http://127.0.0.1:8000' + self.image.url
@@ -78,7 +79,8 @@ class Product(models.Model):
 
     def get_thumbnail(self):
         """
-        If Thumnail exists return thumbnail url if not Creates thumbnail from image & return the url
+        If Thumnail exists returns thumbnail url if not Creates thumbnail from image & return the url,
+        If images doesn't exists returns null
         """
         if self.thumbnail:
             return 'http://127.0.0.1:8000' + self.thumbnail.url
@@ -86,18 +88,22 @@ class Product(models.Model):
             if self.image:
                 self.thumbnail = self.make_thumbnail(self.image)            
                 self.save()
+
+                return 'http://127.0.0.1:8000' + self.thumbnail.url
             else:    
                 return ''
 
     def make_thumbnail(self, image, size=(300 , 200)):
         """
-        Take image input , creates thumbnail & return the thumbnail
+        Take image as input , creates thumbnail of size(300 x 200) & returns the thumbnail
         """
         #creates a new object with given image
         img = Image.open(image)
 
         #Convert To RGB Just To Be Sure Evrything Is Fine
         img.convert('RGB')
+
+        #creates thumbnail of size = (300 , 200)
         img.thumbnail(size)
 
         thumb_io = BytesIO()
