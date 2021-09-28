@@ -27,12 +27,12 @@ class ProductDetails(APIView):
         # check if object exists
         try:
             # filters every product in category  & get product url from that
-            return Product.objects.filter(category_slug=category_slug).get(slug=product_slug)
+            return Product.objects.filter(category__slug=category_slug).get(slug=product_slug)
         except Product.DoesNotExist:
             raise Http404
 
-    def get(self, category_slug, product_slug, format=None):
-        """Returns Single Product Object Data In Json"""
+    def get(self, request, category_slug, product_slug, format=None):
+        """Returns Single Product Details Data In Json"""
         product = self.get_object(category_slug, product_slug)
         # converts products into serializer,
         serializer = ProductSerializer(product)
