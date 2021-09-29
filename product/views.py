@@ -5,8 +5,8 @@ from rest_framework import serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .models import Product
-from .serializers import ProductSerializer
+from .models import Category, Product
+from .serializers import CategorySerializer, ProductSerializer
 # Create your views here.
 
 class LatestProductsList(APIView):
@@ -31,9 +31,31 @@ class ProductDetails(APIView):
         except Product.DoesNotExist:
             raise Http404
 
+    # Gets Request When User Hits The Url
+    # Gets Input From /product/urls.py : path('products/<slug:category_slug>/<slug:product_slug>', views.ProductDetails.as_view())
     def get(self, request, category_slug, product_slug, format=None):
         """Returns Single Product Details Data In Json"""
         product = self.get_object(category_slug, product_slug)
         # converts products into serializer,
         serializer = ProductSerializer(product)
+        return Response(serializer.data)
+
+class CategoryDetail(APIView):
+    """For Displaying Category Details Clicked By User"""
+    def get_object(self, category_slug):
+        "Returns The Category Object If category doesn't exists returns Http404 error"
+        # check if object exists
+        try:
+            # Gets The Category Slug
+            return Category.objects.get(slug=category_slug)
+        except Category.DoesNotExist:
+            raise Http404
+
+    # Gets Request When User Hits The Url
+    # Gets Input From /product/urls.py : path('products/<slug:category_slug>/<slug:product_slug>', views.ProductDetails.as_view())
+    def get(self, request, category_slug, format=None):
+        """Returns Single Category Details Data In Json"""
+        category = self.get_object(category_slug)
+        # converts products into serializer,
+        serializer = CategorySerializer(category)
         return Response(serializer.data)
